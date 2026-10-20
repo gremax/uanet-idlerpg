@@ -31,6 +31,7 @@ The parts differ:
   `bot.pl`: distributing modified versions needs written permission from the
   authors. This fork does not have it, same as the forks it is based on.
 - `lang/` holds the bot's messages taken out of `bot.pl`, and translations of
-  them, so it falls under the same terms as `bot.pl`.
+  them; `events.uk.txt` translates `events.txt`. Both fall under the same terms
+  as `bot.pl`.
 - `lib/` and `t/` are new code written for this fork and are under the MIT
   license, see `LICENSE-MIT`.

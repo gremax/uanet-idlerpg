@@ -181,14 +181,14 @@ war.balanced Війна між чотирма частинами королів�
 # hand of god, calamities, godsends
 hog.win Істинно кажу тобі: розверзлися небеса, і благословенна Рука Божа перенесла %{player} на %{time} ближче до рівня %{level}.
 hog.lose І простяг Він мізинця Свого серед них, і поглинув %{player} вогнем, відкинувши нечестивця на %{time} від рівня %{level}.
-calamity %{player} %{event}. Через це лихо до рівня %{level} лишається на %{time} більше.
+calamity %{player} %{event}. Це лихо відкидає %{player} на %{time} від рівня %{level}.
 calamity.amulet %{player} падає й відколює камінь в амулеті! Амулет %{player} втрачає 10% сили.
 calamity.charm %{player} послизається й упускає оберіг у брудне болото! Оберіг %{player} втрачає 10% сили.
 calamity.weapon %{player} лишає зброю під дощем, і та іржавіє! Зброя %{player} втрачає 10% сили.
 calamity.tunic %{player} розливає на туніку зілля зменшення 7 рівня! Туніка %{player} втрачає 10% сили.
 calamity.shield Вогняний подих дракона пошкоджує щит %{player}! Щит %{player} втрачає 10% сили.
 calamity.leggings %{player} пропалює діру в поножах, поки прасує їх! Поножі %{player} втрачають 10% сили.
-godsend %{player} %{event}! Завдяки цьому дару небес до рівня %{level} лишається на %{time} менше.
+godsend %{player} %{event}! Цей дар небес наближає %{player} до рівня %{level} на %{time}.
 godsend.amulet Мандрівний священник благословляє амулет %{player}! Амулет %{player} стає на 10% сильнішим.
 godsend.charm Оберіг %{player} ковтає блискавку! Оберіг %{player} стає на 10% сильнішим.
 godsend.weapon %{player} гострить лезо своєї зброї! Зброя %{player} стає на 10% сильнішою.
@@ -205,7 +205,7 @@ quest.fail Через гординю й самолюбство %{player} гні�
 
 # alignment
 goodness %{p1} і %{p2} не дають беззаконню лихих людей отруїти себе. Разом вони моляться своєму богові, і його світло сяє на них. Їхні таймери скорочено на %{gain}%.
-evil.steal %{player} уві сні краде в %{target} %{item_acc} %{level} рівня! Натомість %{target} дістається стара річ %{player} %{oldlevel} рівня.
+evil.steal Поки %{target} спить, %{player} краде %{item_acc} %{level} рівня! Натомість %{target} дістається стара річ %{player} %{oldlevel} рівня.
 evil.fail Ти намагаєшся вкрасти в %{target} %{item_acc}, але твоя річ того ж типу краща. Ти тихо повертаєшся в тінь.
 evil.forsaken Злий бог відвертається від %{player}. До таймера %{player} додано %{time}.
 
