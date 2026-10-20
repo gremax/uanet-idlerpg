@@ -99,6 +99,7 @@ GetOptions(\%opts,
     "modesperline=i",
     "okurl|k=s@",
     "eventsfile=s",
+    "eventrate=f",
     "rpstep=f",
     "rpbase=i",
     "rppenstep=f",
@@ -1307,21 +1308,23 @@ sub rpcheck { # check levels, update database
                                    $rps{$_}{alignment} eq "e" } keys(%rps));
     my $onlinegood = scalar(grep { $rps{$_}{online} &&
                                    $rps{$_}{alignment} eq "g" } keys(%rps));
+    # multiplies the chance of every random event, for testing
+    my $rate = $opts{eventrate} || 1;
     if (!$opts{noscale}) {
-        if (rand((20*86400)/$opts{self_clock}) < $online) { hog(); }
-        if (rand((24*86400)/$opts{self_clock}) < $online) { team_battle(); }
-        if (rand((8*86400)/$opts{self_clock}) < $online) { calamity(); }
-        if (rand((4*86400)/$opts{self_clock}) < $online) { godsend(); }
+        if (rand((20*86400)/$opts{self_clock}) < $online*$rate) { hog(); }
+        if (rand((24*86400)/$opts{self_clock}) < $online*$rate) { team_battle(); }
+        if (rand((8*86400)/$opts{self_clock}) < $online*$rate) { calamity(); }
+        if (rand((4*86400)/$opts{self_clock}) < $online*$rate) { godsend(); }
     }
     else {
-        hog() if rand(4000) < 1;
-        team_battle() if rand(4000) < 1;
-        calamity() if rand(4000) < 1;
-        godsend() if rand(2000) < 1;
+        hog() if rand(4000) < $rate;
+        team_battle() if rand(4000) < $rate;
+        calamity() if rand(4000) < $rate;
+        godsend() if rand(2000) < $rate;
     }
-    if (rand((8*86400)/$opts{self_clock}) < $onlineevil) { evilness(); }
-    if (rand((12*86400)/$opts{self_clock}) < $onlinegood) { goodness(); }
-    if (rand((10*86400)/$opts{self_clock}) < 1) { war(); }
+    if (rand((8*86400)/$opts{self_clock}) < $onlineevil*$rate) { evilness(); }
+    if (rand((12*86400)/$opts{self_clock}) < $onlinegood*$rate) { goodness(); }
+    if (rand((10*86400)/$opts{self_clock}) < $rate) { war(); }
 
     moveplayers();
     process_items();
