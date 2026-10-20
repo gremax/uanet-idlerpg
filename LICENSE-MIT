@@ -1,4 +1,4 @@
-This license covers lib/ and t/ only. See README.md for the other files.
+This license covers lib/, t/, docker/, Dockerfile and .github/ only. See README.md for the other files.
 
 MIT License
 
