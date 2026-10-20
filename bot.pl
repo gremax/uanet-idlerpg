@@ -26,6 +26,7 @@ use IO::Socket::INET6;
 use IO::Select;
 use Data::Dumper;
 use Getopt::Long;
+use Encode ();
 use FindBin;
 use lib "$FindBin::Bin/lib";
 use IRPG::Lang;
@@ -107,10 +108,10 @@ GetOptions(\%opts,
     "langdir=s",
 ) or debug("Error: Could not parse command line. Try $0 --help\n",1);
 
+$opts{help} and do { help(); exit 0; };
+
 my $lang; # IRPG::Lang message table
 loadlang();
-
-$opts{help} and do { help(); exit 0; };
 
 debug("Config: read $_: ".Dumper($opts{$_})) for keys(%opts);
 
@@ -201,7 +202,7 @@ if (! -e $opts{dbfile}) {
 print "\n".debug("Becoming a daemon...")."\n";
 daemonize();
 
-$SIG{HUP} = "readconfig"; # sighup = reread config file
+$SIG{HUP} = "rehash"; # sighup = reread config file and message table
 
 CONNECT: # cheese.
 
@@ -464,7 +465,7 @@ sub parse {
                         privmsg(msg('notonchan', channel => $opts{botchan}),
                                 $usernick);
                     }
-                    elsif (length($arg[4]) > 16 || length($arg[4]) < 1) {
+                    elsif (ulength($arg[4]) > 16 || ulength($arg[4]) < 1) {
                         privmsg(msg('register.namelength'), $usernick);
                     }
                     elsif ($arg[4] =~ /^#/) {
@@ -481,7 +482,7 @@ sub parse {
                            "@arg[6..$#arg]" =~ /[[:^print:]]/)) {
                         privmsg(msg('register.nonprint'),$usernick);
                     }
-                    elsif (length("@arg[6..$#arg]") > 30) {
+                    elsif (ulength("@arg[6..$#arg]") > 30) {
                         privmsg(msg('register.classlength'),$usernick);
                     }
                     elsif (time() == $lastreg) {
@@ -623,9 +624,13 @@ sub parse {
                     privmsg(msg('noaccess', cmd => "REHASH"), $usernick);
                 }
                 else {
-                    readconfig();
-                    loadlang();
-                    privmsg(msg('rehash.done'),$usernick,1);
+                    if (rehash()) {
+                        privmsg(msg('rehash.done'),$usernick,1);
+                    }
+                    else {
+                        privmsg("Error: Cannot load message table, kept the ".
+                                "old one. See the debug log.",$usernick,1);
+                    }
                     $opts{botchan} =~ s/ .*//; # strip channel key if present
                 }
             }
@@ -799,8 +804,8 @@ sub parse {
                 else {
                     $rps{$username}{alignment} = substr(lc($arg[4]),0,1);
                     chanmsg(msg('align.chan', player => $username,
-                                alignment => lc($arg[4])));
-                    privmsg(msg('align.done', alignment => lc($arg[4])),
+                                alignment => alignname(lc($arg[4]))));
+                    privmsg(msg('align.done', alignment => alignname(lc($arg[4]))),
                             $usernick);
                 }
             }
@@ -1200,11 +1205,31 @@ sub duration { # return human duration of seconds
 }
 
 sub loadlang { # (re)load the message table for $opts{lang}
-    $lang = IRPG::Lang->load($opts{langdir} || "lang", $opts{lang} || "en");
+    my $new = eval {
+        IRPG::Lang->load($opts{langdir} || "lang", $opts{lang} || "en");
+    };
+    if (!$new) {
+        # die if there is no table yet, otherwise keep the old one
+        debug("Error: Cannot load message table: $@", !$lang);
+        return 0;
+    }
+    $lang = $new;
+    return 1;
+}
+
+sub rehash { # reread config file and message table
+    readconfig();
+    return loadlang();
 }
 
 sub msg { # return message $key from the message table, filled in with %args
     return $lang->msg(@_);
+}
+
+sub ulength { # length in characters of UTF-8 text, in bytes if it is not UTF-8
+    my $text = shift;
+    my $chars = eval { Encode::decode('UTF-8', $text, Encode::FB_CROAK) };
+    return defined($chars) ? length($chars) : length($text);
 }
 
 sub andlist { # "a, b and c"
@@ -1213,6 +1238,29 @@ sub andlist { # "a, b and c"
     $text = msg('list.and', a => pop(@_), b => $text) if @_;
     $text = msg('list.comma', a => pop(@_), b => $text) while @_;
     return $text;
+}
+
+sub itemargs { # item, item_acc message arguments: names of item $type
+    my $type = shift;
+    my %names = (
+        "ring" => [msg('item.ring'), msg('item.ring.acc')],
+        "amulet" => [msg('item.amulet'), msg('item.amulet.acc')],
+        "charm" => [msg('item.charm'), msg('item.charm.acc')],
+        "weapon" => [msg('item.weapon'), msg('item.weapon.acc')],
+        "helm" => [msg('item.helm'), msg('item.helm.acc')],
+        "tunic" => [msg('item.tunic'), msg('item.tunic.acc')],
+        "pair of gloves" => [msg('item.gloves'), msg('item.gloves.acc')],
+        "shield" => [msg('item.shield'), msg('item.shield.acc')],
+        "set of leggings" => [msg('item.leggings'), msg('item.leggings.acc')],
+        "pair of boots" => [msg('item.boots'), msg('item.boots.acc')],
+    );
+    return (item => $names{$type}[0], item_acc => $names{$type}[1]);
+}
+
+sub alignname { # name of alignment good, neutral or evil
+    my %names = (good => msg('align.good'), neutral => msg('align.neutral'),
+                 evil => msg('align.evil'));
+    return $names{shift()};
 }
 
 sub plist { # p1..p4 message arguments for the four questers
@@ -1480,7 +1528,7 @@ sub challenge_opp { # pit argument player against random player
             if (itemlevel($rps{$opp}{item}{$type}) > itemlevel($rps{$u}{item}{$type})) {
                 chanmsg(clog(msg('battle.item', opp => $opp,
                                  opplevel => itemlevel($rps{$opp}{item}{$type}),
-                                 item => $type, player => $u,
+                                 itemargs($type), player => $u,
                                  level => itemlevel($rps{$u}{item}{$type}))));
                 my $tempitem = $rps{$u}{item}{$type};
                 $rps{$u}{item}{$type}=$rps{$opp}{item}{$type};
@@ -1638,7 +1686,7 @@ sub exchange_item { # take item and drop the current
         notice(msg('unique.h', level => $ulevel),$rps{$u}{nick});
     }
     else {
-        notice(msg('item.better', level => $level, item => $type,
+        notice(msg('item.better', level => $level, itemargs($type),
                    current => itemlevel($rps{$u}{item}{$type})),
                $rps{$u}{nick});
     }
@@ -1720,7 +1768,7 @@ sub find_item { # find item for argument player
         exchange_item($u,$type,$level);
     }
     else {
-        notice(msg('item.worse', level => $level, item => $type,
+        notice(msg('item.worse', level => $level, itemargs($type),
                    current => itemlevel($rps{$u}{item}{$type})),
                $rps{$u}{nick});
         drop_item($u,$type,$level);
@@ -2410,7 +2458,7 @@ sub collision_fight {
             if (itemlevel($rps{$opp}{item}{$type}) > itemlevel($rps{$u}{item}{$type})) {
                 chanmsg(msg('battle.item', opp => $opp,
                             opplevel => itemlevel($rps{$opp}{item}{$type}),
-                            item => $type, player => $u,
+                            itemargs($type), player => $u,
                             level => itemlevel($rps{$u}{item}{$type})));
                 my $tempitem = $rps{$u}{item}{$type};
                 $rps{$u}{item}{$type}=$rps{$opp}{item}{$type};
@@ -2503,11 +2551,11 @@ sub evilness {
             $rps{$target}{item}{$type} = $tempitem;
             chanmsg(clog(msg('evil.steal', player => $me, target => $target,
                              level => itemlevel($rps{$me}{item}{$type}),
-                             item => $type,
+                             itemargs($type),
                              oldlevel => itemlevel($rps{$target}{item}{$type}))));
         }
         else {
-            notice(msg('evil.fail', target => $target, item => $type),
+            notice(msg('evil.fail', target => $target, itemargs($type)),
                    $rps{$me}{nick});
         }
     }

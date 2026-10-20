@@ -21,6 +21,19 @@ for my $n (sort { $a <=> $b } keys(%levels)) {
 }
 is($uk->msg('levelup', player => 'Don', class => 'NPC', level => 5),
    'Don, the NPC, has attained level 5!', 'a missing uk key falls back to en');
+is($uk->msg('crlf'), 'рядок', 'CRLF line endings are stripped');
+is($uk->msg('items', n => 5), '5 items',
+   'an en fallback key uses the en plural rule');
+{
+    my @warnings;
+    local $SIG{__WARN__} = sub { push(@warnings, @_) };
+    is($en->msg('suffix', n => 2), 'x', 'an empty last plural form is kept');
+    is_deeply(\@warnings, [], 'and renders without warnings');
+}
+ok(!eval { IRPG::Lang->load($dir, 'de') }, 'a language without a plural rule is rejected');
+like($@, qr/^No plural rule for language "de"/, 'and the error names it');
+is($en->msg('spaced'), 'x  y',
+   'any whitespace separates the key, spaces inside the text are kept');
 is($en->msg('no.such.key'), 'no.such.key', 'an unknown key renders as itself');
 is($en->msg('#levelup'), '#levelup', 'comment lines define no keys');
 is($en->msg('levelup', player => '%{class}', class => 'NPC', level => 5),

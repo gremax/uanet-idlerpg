@@ -1,5 +1,8 @@
 # battles
 #levelup	commented out
 
-levelup	%{player}, the %{class}, has attained level %{level}!
-duration	%{days} %{days|day|days}, %{hms}
+levelup %{player}, the %{class}, has attained level %{level}!
+duration %{days} %{days|day|days}, %{hms}
+items %{n} %{n|item|items}
+suffix x%{n|a|}
+spaced   x  y

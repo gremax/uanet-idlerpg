@@ -1,32 +1,24 @@
 use strict;
 use warnings;
 use FindBin;
+use lib "$FindBin::Bin/../lib";
 use Test::More;
+use IRPG::Lang;
 
 # the real message files against the keys bot.pl uses
 my $root = "$FindBin::Bin/..";
 
-sub readlang {
-    my $file = shift;
-    my %msgs;
-    open(my $fh, '<', $file) or die("Cannot open $file: $!\n");
-    while (my $line = <$fh>) {
-        chomp($line);
-        next if $line =~ /^#/ || !length($line);
-        my ($key, $text) = split(/\t/, $line, 2);
-        $msgs{$key} = $text;
-    }
-    close($fh);
-    return \%msgs;
-}
+# other forms of a placeholder that bot.pl passes along with it, so a
+# translation may use either
+my %variants = (item_acc => 'item');
 
 sub placeholders {
     my $text = shift;
-    my %names = map { $_ => 1 } ($text =~ /%\{(\w+)[|}]/g);
+    my %names = map { ($variants{$_} // $_) => 1 } ($text =~ /%\{(\w+)[|}]/g);
     return join(",", sort keys(%names));
 }
 
-my $en = readlang("$root/lang/en.txt");
+my $en = IRPG::Lang::parse("$root/lang/en.txt");
 
 open(my $fh, '<', "$root/bot.pl") or die("Cannot open bot.pl: $!\n");
 my $code = do { local $/; <$fh> };
@@ -43,7 +35,7 @@ for my $key (sort keys(%$en)) {
 
 for my $file (glob("$root/lang/*.txt")) {
     next if $file =~ m{/en\.txt$};
-    my $tr = readlang($file);
+    my $tr = IRPG::Lang::parse($file);
     for my $key (sort keys(%$tr)) {
         ok(exists($en->{$key}), "$file: $key exists in en.txt") or next;
         is(placeholders($tr->{$key}), placeholders($en->{$key}),

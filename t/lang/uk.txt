@@ -1,2 +1,3 @@
-levels	%{n} %{n|рівень|рівні|рівнів}
-duration	%{days} %{days|день|дні|днів}, %{hms}
+levels %{n} %{n|рівень|рівні|рівнів}
+duration %{days} %{days|день|дні|днів}, %{hms}
+crlf рядок
