@@ -8,3 +8,5 @@ mapitems.db
 modifiers.txt
 questinfo.txt
 
+local/
+items.db
