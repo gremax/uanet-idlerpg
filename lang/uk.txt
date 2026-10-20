@@ -1,0 +1,218 @@
+# Ukrainian messages for the IdleRPG bot. Format and placeholders: see en.txt.
+#
+# Style: the bot addresses the player as «ти». The player's gender is unknown,
+# so verbs are in the present tense or impersonal («падає», «додано»), never
+# a gendered past tense («упав/упала»). Command names and their keyword
+# arguments stay in Latin, as in the Atheme translation
+# (docs/atheme-uk-glossary.md in uanet-infra).
+
+# common
+duration %{days} %{days|день|дні|днів}, %{hms}
+nextlevel %{player} досягне наступного рівня через %{time}.
+notloggedin Вхід не виконано.
+already.online Ти вже в грі як %{player}.
+notonchan Тебе немає на %{channel}.
+nosuch.account Акаунта %{player} немає.
+nosuch.username Персонажа %{player} немає.
+nosuch.user Такого гравця немає.
+noaccess У тебе немає доступу до %{cmd}.
+noaccess.alt У тебе немає доступу до %{cmd}.
+noaccess.loser Доступу немає, невдахо.
+okay Гаразд.
+list.and %{a} і %{b}
+list.comma %{a}, %{b}
+
+# login
+online %{player}, %{class} %{level} рівня, тепер у грі з ніком %{nick}. Наступний рівень через %{time}.
+login.ok Вхід виконано. Наступний рівень через %{time}.
+autologin.list Автоматичний вхід: гравців %{users}, хостів %{hosts}; персонажі: %{accounts}
+autologin.count Автоматичний вхід: гравців %{users}, хостів %{hosts}.
+autologin.none Автоматичний вхід: нікого.
+usage.login Синтаксис: LOGIN <ім'я_персонажа> <пароль>
+login.nosuch Такого акаунта немає. Зверни увагу: великі й малі літери в іменах розрізняються.
+login.wrongpass Неправильний пароль.
+
+# register
+usage.register Синтаксис: REGISTER <ім'я_персонажа> <пароль> <клас>
+usage.register.example Приклад: REGISTER Poseidon MyPassword Бог морів
+register.paused Поки бот на паузі, нові акаунти не реєструються. Зачекай кілька хвилин і спробуй ще раз.
+register.taken Це ім'я персонажа вже зайняте.
+register.reserved Це ім'я персонажа зареєструвати не можна.
+register.namelength Ім'я персонажа має бути від 1 до 16 символів.
+register.hash Ім'я персонажа не може починатися з #.
+register.ctcp Ім'я персонажа не може містити символ \001.
+register.ccodes Ні ім'я персонажа, ні клас не можуть містити керівних кодів.
+register.nonprint Ні ім'я персонажа, ні клас не можуть містити недрукованих символів.
+register.classlength Клас має бути не довшим за 30 символів.
+register.wait Зачекай секунду й спробуй ще раз.
+register.welcome У %{nick} новий персонаж: %{player}, %{class}! Наступний рівень через %{time}.
+register.ok Готово! Акаунт %{player} створено. До рівня 1 тобі треба простояти без діла %{seconds} %{seconds|секунду|секунди|секунд}.
+register.note ВАЖЛИВО: мета гри в тому, щоб простояти без діла якнайдовше. Тому будь-яка репліка в каналі, вихід із каналу, вихід з IRC і зміна ніка дають штраф.
+
+# player commands
+quest.none Зараз немає активного квесту.
+quest.status1 %{p1}, %{p2}, %{p3} і %{p4} вирушили на квест, щоб %{text}. Квест завершиться через %{time}.
+quest.status2 %{p1}, %{p2}, %{p3} і %{p4} вирушили на квест, щоб %{text}. Спершу всім треба дійти до [%{x1},%{y1}], потім до [%{x2},%{y2}].
+quest.mapurl Стеж за їхньою подорожжю на %{url}.
+status %{player}: рівень %{level}, %{class}; статус: %{status}; до рівня: %{ttl}; простій: %{idled}; сума предметів: %{sum}
+status.online у грі
+status.offline поза грою
+whoami Ти — %{player}, %{class} %{level} рівня. Наступний рівень через %{time}.
+usage.newpass Синтаксис: NEWPASS <новий_пароль>
+newpass.done Пароль змінено.
+usage.align Синтаксис: ALIGN <good|neutral|evil> (добро, нейтральність, зло)
+align.good добро
+align.neutral нейтральність
+align.evil зло
+align.chan %{player} обирає шлях: %{alignment}.
+align.done Твій шлях тепер: %{alignment}.
+removeme.done Акаунт %{player} видалено.
+removeme.chan %{by} видаляє свій акаунт %{player} (%{class}).
+help.user Довідка про команди бота: %{url}
+info.user IRPG bot v%{version} від jotun, http://idlerpg.net/. Сервер: %{server}. Адміни в мережі: %{admins}.
+usage.teleport Синтаксис: TELEPORT <x> <y>
+teleport.no Тобі не можна користуватися TELEPORT.
+usage.fight Синтаксис: FIGHT <гравець>
+fight.no Тобі не можна користуватися FIGHT.
+ban.kick Реклама заборонена; бан знімемо протягом години.
+
+# admin commands
+usage.delold Синтаксис: DELOLD <кількість_днів>
+delold.done %{by} видаляє акаунти, у які не заходили %{days} %{days|день|дні|днів}. Видалено: %{count}.
+usage.del Синтаксис: DEL <ім'я_персонажа>
+del.done %{by} видаляє акаунт %{player}.
+usage.mkadmin Синтаксис: MKADMIN <ім'я_персонажа>
+mkadmin.done Акаунт %{player} тепер адмін бота.
+usage.deladmin Синтаксис: DELADMIN <ім'я_персонажа>
+deladmin.owner До акаунта власника DELADMIN застосувати не можна.
+deladmin.done Акаунт %{player} більше не адмін бота.
+hog.summon %{nick} закликає Руку Божу.
+rehash.done Файл конфігурації перечитано.
+usage.chpass Синтаксис: CHPASS <ім'я_персонажа> <новий_пароль>
+chpass.done Пароль для %{player} змінено.
+usage.chuser Синтаксис: CHUSER <ім'я_персонажа> <нове_ім'я>
+chuser.taken Ім'я %{player} уже зайняте.
+chuser.done Ім'я %{player} змінено на %{new}.
+usage.chclass Синтаксис: CHCLASS <ім'я_персонажа> <новий_клас>
+chclass.done Клас %{player} змінено на %{class}.
+usage.push Синтаксис: PUSH <ім'я_персонажа> <секунди>
+push.toomuch До рівня %{player} лишилося менше (%{next} с), ніж %{seconds} с; ставлю 0.
+push.all %{nick} підштовхує %{player} на %{seconds} с до рівня %{level}
+push.done %{nick} підштовхує %{player} на %{seconds} с до рівня %{level}. %{player} досягне наступного рівня через %{time}.
+help.url Довідка: %{url}
+help.admin Адмінські команди: %{url}
+reloaddb.paused ПОМИЛКА: RELOADDB працює лише в режимі PAUSE.
+reloaddb.done Базу гравців перечитано. Акаунтів: %{count}.
+backup.done %{file} скопійовано в .dbbackup/%{file}%{time}
+pause.done PAUSE_MODE тепер %{mode}.
+usage.silent Синтаксис: SILENT <режим>
+silent.done SILENT_MODE тепер %{mode}.
+usage.jump Синтаксис: JUMP <сервер[:порт]>
+clearq.chan %{by} очищає чергу вихідних повідомлень.
+clearq.done Чергу вихідних повідомлень очищено.
+info.admin Надіслано %{sent} КБ, отримано %{received} КБ за %{uptime}. Гравців у грі: %{online} з %{total}. Нових акаунтів від запуску: %{registrations}. PAUSE_MODE: %{pause}, SILENT_MODE: %{silent}. Черга: байтів %{qbytes}, повідомлень %{qitems}. Сервер: %{server}. Адміни в мережі: %{admins}.
+usage.move Синтаксис: MOVE <гравець> <x> <y>
+move.done %{player} переміщено з %{oldx},%{oldy} на %{x},%{y}.
+usage.pit Синтаксис: PIT <гравець_1> <гравець_2>
+pit.done %{player} проти %{opp}: бій!
+topic.entry #%{rank}: %{player}, рів. %{level} %{class};
+
+# levels and the top list
+levelup %{player}, %{class}, досягає рівня %{level}! Наступний рівень через %{time}.
+top.header Найкращі гравці IdleRPG:
+top.entry %{player}, %{class} %{level} рівня, посідає місце #%{rank}! Наступний рівень через %{time}.
+
+# items
+item.ring каблучка
+item.ring.acc каблучку
+item.amulet амулет
+item.amulet.acc амулет
+item.charm оберіг
+item.charm.acc оберіг
+item.weapon зброя
+item.weapon.acc зброю
+item.helm шолом
+item.helm.acc шолом
+item.tunic туніка
+item.tunic.acc туніку
+item.gloves рукавиці
+item.gloves.acc рукавиці
+item.shield щит
+item.shield.acc щит
+item.leggings поножі
+item.leggings.acc поножі
+item.boots чоботи
+item.boots.acc чоботи
+item.better Ти знаходиш %{item_acc} %{level} рівня! У тебе зараз %{item} лише %{current} рівня, тож удача на твоєму боці!
+item.worse Ти знаходиш %{item_acc} %{level} рівня. У тебе вже є %{item} %{current} рівня, тож удача не на твоєму боці. Знахідку ти викидаєш.
+unique.a Світло богів сяє на тебе! Ти знаходиш Всевидючу Велику Корону Маттта %{level} рівня! Вороги падають перед тобою, бо ти передбачаєш кожен їхній крок.
+unique.b Світло богів сяє на тебе! Ти знаходиш Захисний Латний Обладунок Res0 %{level} рівня! Вороги тремтять від страху, бо їхні удари тебе не беруть.
+unique.c Світло богів сяє на тебе! Ти знаходиш Штормовий Магічний Амулет Двіна %{level} рівня! Ворогів змітає стихійна лють ще до початку війни.
+unique.d Світло богів сяє на тебе! Ти знаходиш Колосальний Меч Люті Йотуна %{level} рівня! Ненависть ворогів швидко скінчується: ти змахуєш зап'ястям і завдаєш нищівного удару.
+unique.e Світло богів сяє на тебе! Ти знаходиш Ціпок Сліпої Люті Дрдінка %{level} рівня! Вороги розлітаються, поки ти наосліп махаєш рукою й лупиш усе довкола.
+unique.f Світло богів сяє на тебе! Ти знаходиш Чарівні Чоботи Прудкості Мрквіка %{level} рівня! Вороги давляться твоїм пилом, бо ти тікаєш від них дуже, дуже швидко.
+unique.g Світло богів сяє на тебе! Ти знаходиш Молот Тями Джеффа %{level} рівня! Вороги раптом набираються тями... саме тоді, коли ти вибиваєш її з них.
+unique.h Світло богів сяє на тебе! Ти знаходиш Сяйливу Каблучку Блиску Джульєтти %{level} рівня! Ворогів засліплюють її сяйво й власна жадібність, а ти несеш їм спустошення.
+
+# battles
+challenge.won %{player} [%{roll}/%{sum}] викликає на бій %{opp} [%{opproll}/%{oppsum}] і перемагає! З таймера %{player} знято %{time}.
+challenge.lost %{player} [%{roll}/%{sum}] викликає на бій %{opp} [%{opproll}/%{oppsum}] і програє! До таймера %{player} додано %{time}.
+collision.won %{player} [%{roll}/%{sum}] натрапляє на %{opp} [%{opproll}/%{oppsum}] і перемагає в бою! З таймера %{player} знято %{time}.
+collision.lost %{player} [%{roll}/%{sum}] натрапляє на %{opp} [%{opproll}/%{oppsum}] і зазнає поразки! До таймера %{player} додано %{time}.
+critical %{player} завдає %{opp} критичного удару! До таймера %{opp} додано %{time}.
+battle.item У запеклому бою %{opp} упускає %{item_acc} %{opplevel} рівня! %{player} підбирає знахідку, а %{opp} дістається стара річ %{player} %{level} рівня.
+teambattle.won %{p1}, %{p2} і %{p3} [%{roll}/%{sum}] б'ються командою проти %{p4}, %{p5} і %{p6} [%{opproll}/%{oppsum}] у точці [%{x},%{y}] і перемагають! З їхніх таймерів знято %{time}.
+teambattle.lost %{p1}, %{p2} і %{p3} [%{roll}/%{sum}] б'ються командою проти %{p4}, %{p5} і %{p6} [%{opproll}/%{oppsum}] у точці [%{x},%{y}] і програють! До їхніх таймерів додано %{time}.
+bows %{player} зустрічає %{admin} і смиренно вклоняється.
+
+# war
+war.quadrant.0 Північний Схід
+war.quadrant.1 Південний Схід
+war.quadrant.2 Південний Захід
+war.quadrant.3 Північний Захід
+war.side %{quadrant} [%{roll}/%{sum}]
+war.winners Переможці: %{list}
+war.losers Переможені: %{list}
+war.neutrals Дипломатія нейтральних сторін (%{list}) гідна захоплення.
+war.both Війна між чотирма частинами королівства! %{winners}. %{losers}.%{neutrals}
+war.one Війна між чотирма частинами королівства! %{text}.%{neutrals}
+war.balanced Війна між чотирма частинами королівства закінчується нічиєю.%{neutrals}
+
+# hand of god, calamities, godsends
+hog.win Істинно кажу тобі: розверзлися небеса, і благословенна Рука Божа перенесла %{player} на %{time} ближче до рівня %{level}.
+hog.lose І простяг Він мізинця Свого серед них, і поглинув %{player} вогнем, відкинувши нечестивця на %{time} від рівня %{level}.
+calamity %{player} %{event}. Через це лихо до рівня %{level} лишається на %{time} більше.
+calamity.amulet %{player} падає й відколює камінь в амулеті! Амулет %{player} втрачає 10% сили.
+calamity.charm %{player} послизається й упускає оберіг у брудне болото! Оберіг %{player} втрачає 10% сили.
+calamity.weapon %{player} лишає зброю під дощем, і та іржавіє! Зброя %{player} втрачає 10% сили.
+calamity.tunic %{player} розливає на туніку зілля зменшення 7 рівня! Туніка %{player} втрачає 10% сили.
+calamity.shield Вогняний подих дракона пошкоджує щит %{player}! Щит %{player} втрачає 10% сили.
+calamity.leggings %{player} пропалює діру в поножах, поки прасує їх! Поножі %{player} втрачають 10% сили.
+godsend %{player} %{event}! Завдяки цьому дару небес до рівня %{level} лишається на %{time} менше.
+godsend.amulet Мандрівний священник благословляє амулет %{player}! Амулет %{player} стає на 10% сильнішим.
+godsend.charm Оберіг %{player} ковтає блискавку! Оберіг %{player} стає на 10% сильнішим.
+godsend.weapon %{player} гострить лезо своєї зброї! Зброя %{player} стає на 10% сильнішою.
+godsend.tunic Чарівник накладає на туніку %{player} закляття Міцності! Туніка %{player} стає на 10% міцнішою.
+godsend.shield %{player} зміцнює щит драконячою лускою! Щит %{player} стає на 10% сильнішим.
+godsend.leggings Місцевий чаклун наділяє штани %{player} Духом Стійкості! Поножі %{player} стають на 10% сильнішими.
+
+# quests
+quest.start1 Боги обирають %{p1}, %{p2}, %{p3} і %{p4}, щоб %{text}. Квест завершиться через %{time}.
+quest.start2 Боги обирають %{p1}, %{p2}, %{p3} і %{p4}, щоб %{text}. Спершу всім треба дійти до [%{x1},%{y1}], потім до [%{x2},%{y2}].
+quest.done1 %{p1}, %{p2}, %{p3} і %{p4} виконали квест і принесли королівству благословення! Їхній тягар меншає на 25%.
+quest.done2 %{p1}, %{p2}, %{p3} і %{p4} завершили подорож! Їхній тягар меншає на 25%.
+quest.fail Через гординю й самолюбство %{player} гнів богів падає на королівство. Тяжкі ваші гріхи тягнуть вас донизу, мов свинець, до самого пекла. Тож ви всі на 15 кроків ближче до його роззявленої пащі.
+
+# alignment
+goodness %{p1} і %{p2} не дають беззаконню лихих людей отруїти себе. Разом вони моляться своєму богові, і його світло сяє на них. Їхні таймери скорочено на %{gain}%.
+evil.steal %{player} уві сні краде в %{target} %{item_acc} %{level} рівня! Натомість %{target} дістається стара річ %{player} %{oldlevel} рівня.
+evil.fail Ти намагаєшся вкрасти в %{target} %{item_acc}, але твоя річ того ж типу краща. Ти тихо повертаєшся в тінь.
+evil.forsaken Злий бог відвертається від %{player}. До таймера %{player} додано %{time}.
+
+# penalties
+penalty.nick За зміну ніка до твого таймера додано %{time}.
+penalty.privmsg За повідомлення в каналі до твого таймера додано %{time}.
+penalty.notice За notice в каналі до твого таймера додано %{time}.
+penalty.part За вихід із каналу до твого таймера додано %{time}.
+penalty.kick За те, що тебе вигнали, до твого таймера додано %{time}.
+penalty.logout За команду LOGOUT до твого таймера додано %{time}.
