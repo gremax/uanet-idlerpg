@@ -89,6 +89,7 @@ GetOptions(\%opts,
     "allowuserinfo",
     "noscale",
     "phonehome",
+    "nodaemon",
     "owner=s",
     "owneraddonly",
     "ownerdelonly",
@@ -200,10 +201,14 @@ if (! -e $opts{dbfile}) {
     print "OK, wrote you into $opts{dbfile}.\n";
 }
 
-print "\n".debug("Becoming a daemon...")."\n";
-daemonize();
+if ($opts{nodaemon}) { print debug("Staying in the foreground.")."\n"; }
+else {
+    print "\n".debug("Becoming a daemon...")."\n";
+    daemonize();
+}
 
 $SIG{HUP} = "rehash"; # sighup = reread config file and message table
+$SIG{TERM} = $SIG{INT} = "quitbot"; # save the database before going down
 
 CONNECT: # cheese.
 
@@ -1216,6 +1221,14 @@ sub loadlang { # (re)load the message table for $opts{lang}
     }
     $lang = $new;
     return 1;
+}
+
+sub quitbot { # SIGTERM, SIGINT: save the database, quit IRC and exit
+    # before the bot has joined, %rps has everyone offline; writing it would
+    # lose the automatic logins of the next start
+    writedb() if $lasttime != 1;
+    sts("QUIT :Shutting down",1) if $sock;
+    exit(0);
 }
 
 sub rehash { # reread config file and message table
