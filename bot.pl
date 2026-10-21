@@ -30,6 +30,7 @@ use Encode ();
 use FindBin;
 use lib "$FindBin::Bin/lib";
 use IRPG::Lang;
+use IRPG::Public;
 
 # To use this script in OpenBSD you need to install the Crypt::UnixCrypt
 # perl module because OpenBSD crypt() isn't compatible with the Linux crypt().
@@ -108,6 +109,8 @@ GetOptions(\%opts,
     "dbfile|irpgdb|db|d=s",
     "lang=s",
     "langdir=s",
+    "publicfile=s",
+    "npc=s",
 ) or debug("Error: Could not parse command line. Try $0 --help\n",1);
 
 $opts{help} and do { help(); exit 0; };
@@ -1413,6 +1416,7 @@ sub rpcheck { # check levels, update database
     # on next rpcheck(). 
     if ($lasttime != 1) {
         my $curtime=time();
+        my $levelup = 0;
         for my $k (keys(%rps)) {
             if ($rps{$k}{online} && exists $rps{$k}{nick} &&
                 $rps{$k}{nick} && exists $onchan{$rps{$k}{nick}}) {
@@ -1422,6 +1426,7 @@ sub rpcheck { # check levels, update database
                     my $ttl = int(ttl($rps{$k}{level}));
                     $rps{$k}{level}++;
                     $rps{$k}{next} += $ttl;
+                    $levelup = 1;
                     chanmsg(msg('levelup', player => $k,
                                 class => $rps{$k}{class},
                                 level => $rps{$k}{level},
@@ -1433,6 +1438,8 @@ sub rpcheck { # check levels, update database
             # attempt to make sure this is an actual user
         }
         if (!$pausemode && ($rpreport%60 < $oldrpreport%60)) { writedb(); }
+        # the site shows the new level now, not at the next writedb()
+        elsif (!$pausemode && $levelup) { writepublic(); }
         $oldrpreport = $rpreport;
         $rpreport += $curtime - $lasttime;
         $lasttime = $curtime;
@@ -2586,8 +2593,10 @@ sub evilness {
 }
 
 sub writedb {
-    open(RPS,">$opts{dbfile}") or do {
-        chanmsg("ERROR: Cannot write $opts{dbfile}: $!");
+    # each file is written next to the old one and renamed over it, so a crash
+    # or a full disk never leaves a cut-off database
+    open(RPS,">$opts{dbfile}.tmp") or do {
+        chanmsg("ERROR: Cannot write $opts{dbfile}.tmp: $!");
         return 0;
     };
     print RPS join("\t","# username",
@@ -2660,9 +2669,12 @@ sub writedb {
                                 $rps{$k}{alignment})."\n";
         }
     }
-    close(RPS);
-    open(ITEMS,">$opts{itemdbfile}") or do {
-        chanmsg("ERROR: Cannot write $opts{itemdbfile}: $!");
+    close(RPS) && rename("$opts{dbfile}.tmp",$opts{dbfile}) or do {
+        chanmsg("ERROR: Cannot write $opts{dbfile}: $!");
+        return 0;
+    };
+    open(ITEMS,">$opts{itemdbfile}.tmp") or do {
+        chanmsg("ERROR: Cannot write $opts{itemdbfile}.tmp: $!");
         return 0;
     };
     print ITEMS join("\t","# x pos",
@@ -2681,7 +2693,20 @@ sub writedb {
                                   $curtime-$mapitems{$xy}[$i]{lasttime})."\n";
         }
     }
-    close(ITEMS);
+    close(ITEMS) && rename("$opts{itemdbfile}.tmp",$opts{itemdbfile}) or do {
+        chanmsg("ERROR: Cannot write $opts{itemdbfile}: $!");
+        return 0;
+    };
+    writepublic();
+}
+
+sub writepublic { # the public part of the game, for the site
+    return unless $opts{publicfile};
+    my $data = IRPG::Public::build(rps => \%rps, mapitems => \%mapitems,
+                                   quest => \%quest, modsfile => $opts{modsfile},
+                                   npc => [split(/[\s,]+/,$opts{npc} // "")]);
+    eval { IRPG::Public::write_json($data,$opts{publicfile}); 1 } or
+        warn(debug("Error: $@")."\n");
 }
 
 sub readconfig {

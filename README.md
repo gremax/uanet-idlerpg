@@ -23,6 +23,12 @@ What this fork adds:
 - `events.uk.txt`, the events in Ukrainian.
 - `nodaemon` to stay in the foreground, a SIGTERM handler that saves the database
   and quits IRC, and `eventrate` to make random events more frequent for testing.
+- `publicfile`, the public part of the game as JSON for the site,
+  [gremax/uanet-idlerpg-site](https://github.com/gremax/uanet-idlerpg-site): the
+  players without passwords, nicks or hosts, the items on the map, the quest and
+  the latest events. The bot replaces the file whole (a new file, then a rename)
+  with every database write and at every level up. `npc` names the characters
+  the site marks as NPCs.
 
 Container
 ---------
@@ -36,8 +42,9 @@ bot has no TLS, so a pod runs the image twice:
   (a native sidecar); the bot retries every `reconnect_wait` seconds anyway.
 
 The bot runs as uid 10001 in `/data`: `.irpg.conf` is read from there, and the
-database (`irpg.db`, `items.db`), `modifiers.txt`, `questinfo.txt` and the bot's own
-backups in `.dbbackup/` are written there. Persist `/data`, and run one copy only.
+database (`irpg.db`, `items.db`), `modifiers.txt`, `questinfo.txt`, `public.json`
+and the bot's own backups in `.dbbackup/` are written there. Persist `/data`, and
+run one copy only.
 
 In `.irpg.conf`, point at the code in `/app` and at stunnel:
 
@@ -46,6 +53,7 @@ server 127.0.0.1:6667
 eventsfile /app/events.uk.txt
 langdir /app/lang
 lang uk
+publicfile public.json
 ```
 
 Leave `botident` out; the entrypoint builds it from the environment:
