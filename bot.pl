@@ -1331,8 +1331,12 @@ sub rpcheck { # check levels, update database
     # clear registration limiting
     $lastreg = 0;
     my $online = scalar(grep { $rps{$_}{online} } keys(%rps));
-    # there's really nothing to do here if there are no online users
-    return unless $online;
+    # there's really nothing to do here if there are no online users, but move
+    # the clock on, or the first one to log in gets all the time nobody was
+    if (!$online) {
+        $lasttime = time() if $lasttime != 1;
+        return;
+    }
     my $onlineevil = scalar(grep { $rps{$_}{online} &&
                                    $rps{$_}{alignment} eq "e" } keys(%rps));
     my $onlinegood = scalar(grep { $rps{$_}{online} &&
