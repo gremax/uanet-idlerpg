@@ -1,12 +1,35 @@
+# The events of bot.pl in Ukrainian, for "eventsfile events.uk.txt" and
+# "lang uk". One event per line; the bot reads only lines starting with C, G
+# or Q, so lines starting with # are notes. t/events.t checks these rules.
+#
+# C <text>    a calamity. The bot says:
+#             <гравець> <text>. Це лихо відкидає <гравець> на <час> від рівня <N>.
+# G <text>    a godsend:
+#             <гравець> <text>! Цей дар небес наближає <гравець> до рівня <N> на <час>.
+# Q1 <text>   a quest that lasts 12 to 24 hours:
+#             Боги обирають A, B, C і D, щоб <text>. Квест завершиться через <час>.
+# Q2 <x1> <y1> <x2> <y2> <text>
+#             a quest to walk to one point and then another:
+#             Боги обирають A, B, C і D, щоб <text>. Спершу всім треба дійти
+#             до [x1,y1], потім до [x2,y2].
+#
+# - C and G text follows the player's name: a verb in the present tense
+#   ("падає в яму"), which in Ukrainian does not depend on gender.
+# - Q1 and Q2 text follows "щоб": an infinitive ("знайти ...").
+# - No "." or "!" at the end: the bot adds its own.
+# - Q2 points are map coordinates from 0 to 500; small y is north, and
+#   [325,270] is the capital. The site, gremax/uanet-idlerpg-site, names the
+#   place at every point, so a new point needs a name there too.
+
 C наступає на граблі
 C падає в яму
 C прикушує язика
 C випадково підпалює себе
 C з'їдає отруйну ягоду
 C втрачає глузд
-C ненадовго помирає..
+C ненадовго помирає
 C потрапляє в страшну хурделицю
-C ВИБУХАЄ, певною мірою..
+C ВИБУХАЄ, певною мірою
 C отримує ножа в темному провулку
 C дивиться всі серії «Санта-Барбари» поспіль
 C вивертається НАВИВОРІТ, майже
@@ -17,7 +40,7 @@ C отримує удар блискавки
 C відбивається від скаженої корови
 C відбивається від скаженої росомахи
 C раптом спалахує
-C ненадовго втрачає голову..
+C ненадовго втрачає голову
 C отримує копняка від корови
 C вилітає з сідла
 C отримує укус лося
