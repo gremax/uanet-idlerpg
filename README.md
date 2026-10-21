@@ -19,7 +19,9 @@ What this fork adds:
   `%{n|form|form...}` plural forms. `lang` and `langdir` in `.irpg.conf` pick
   the language; keys missing from a translation fall back to `lang/en.txt`.
   The English output is the same as the original bot's.
-- Tests: `prove t/` (Test::More, part of core Perl).
+- Tests: `prove t/` (Test::More, part of core Perl), and `perlcritic lib t`
+  with `.perlcriticrc` for the code the fork adds; `bot.pl` stays as upstream
+  wrote it.
 - `events.uk.txt`, the events in Ukrainian.
 - `nodaemon` to stay in the foreground, a SIGTERM handler that saves the database
   and quits IRC, and `eventrate` to make random events more frequent for testing.

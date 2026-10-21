@@ -43,6 +43,7 @@ sub write_json { # write $data to $file atomically, through a file next to it
     print $fh JSON::PP->new->utf8->canonical->encode($data);
     close($fh) or die("Cannot write $tmp: $!\n");
     rename($tmp, $file) or die("Cannot rename $tmp to $file: $!\n");
+    return;
 }
 
 sub player { # public view of one %rps entry
@@ -78,14 +79,16 @@ sub mapitems { # %mapitems is "x:y" => [ { type, level, lasttime } ]
             push(@items, \%item);
         }
     }
-    return sort { $a->{x} <=> $b->{x} || $a->{y} <=> $b->{y} ||
-                  $a->{type} cmp $b->{type} || $a->{level} <=> $b->{level} }
-                @items;
+    my @sorted = sort { $a->{x} <=> $b->{x} || $a->{y} <=> $b->{y} ||
+                         $a->{type} cmp $b->{type} || $a->{level} <=> $b->{level} }
+                       @items;
+    return @sorted;
 }
 
 sub quest { # the running quest, or undef between quests
     my $q = shift;
-    return undef if !$q || !@{$q->{questers} || []};
+    # build() calls this in a list, where a bare return would shift the keys
+    return undef if !$q || !@{$q->{questers} || []}; ## no critic (ProhibitExplicitReturnUndef)
     my %quest = (type => 0 + $q->{type}, text => text($q->{text}),
                  players => [ map { text($_) } @{$q->{questers}} ],
                  p1 => undef, p2 => undef, stage => undef, ends => undef);

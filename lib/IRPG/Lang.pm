@@ -34,6 +34,7 @@ sub readfile {
         # plural forms follow the language of the file the text came from
         $self->{rule}{$key} = $plural{$lang};
     }
+    return;
 }
 
 sub parse { # return { key => text } from one message file

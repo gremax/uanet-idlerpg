@@ -1,0 +1,10 @@
+# perlcritic lib t: the fork's own code. bot.pl is upstream's and is left as
+# it is.
+severity = 4
+verbose = %f:%l: [%p] %m\n
+program-extensions = .t
+
+# the event log is read in passes back from its end, with the file open
+# throughout
+[InputOutput::RequireBriefOpen]
+lines = 25

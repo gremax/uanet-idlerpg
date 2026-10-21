@@ -13,13 +13,15 @@ use IRPG::Public;
 sub u { return Encode::decode('UTF-8', shift); }
 
 # fixtures are in UTC unless a test says otherwise
-BEGIN { $ENV{TZ} = "UTC" }
+# set before anything reads the time zone, so not local
+BEGIN { $ENV{TZ} = "UTC" } ## no critic (RequireLocalizedPunctuationVars)
 
-sub player { # an %rps entry as loaddb() fills it
+sub player { # an %rps entry as loaddb() fills it, with the fields given
+    my %given = @_;
     my %p = (pass => 'AbCdEfGhIjKlM', isadmin => 0, level => 1, class => 'Class',
              next => 600, nick => 'somenick', userhost => 'someone@host.example',
              online => 1, idled => 0, x => 1, y => 2, created => 1792540000,
-             lastlogin => 1792540000, alignment => 'n', @_);
+             lastlogin => 1792540000, alignment => 'n', %given);
     $p{item}{$_} //= 0 for ("amulet", "charm", "helm", "pair of boots",
                             "pair of gloves", "ring", "set of leggings",
                             "shield", "tunic", "weapon");
@@ -52,8 +54,9 @@ my %quest2 = (questers => [qw(Don Paganel Clamps Blotto)], p1 => [225, 315],
               text => 'спопелити Вежі Анкх-Аллора', type => 2, stage => 1);
 
 sub modsfile { # a modifiers.txt with these lines, written as the bot does
+    my @lines = @_;
     my $tmp = File::Temp->new();
-    print $tmp @_;
+    print $tmp @lines;
     close($tmp);
     return $tmp;
 }
