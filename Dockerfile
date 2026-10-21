@@ -2,8 +2,8 @@
 # (default entrypoint) and stunnel (`stunnel /etc/stunnel/irc.conf`), because
 # bot.pl speaks plain text only. The bot connects to stunnel on 127.0.0.1:6667.
 #
-# Code lives in /app; the database, logs and .irpg.conf live in /data, which is
-# the bot's working directory and the volume to persist.
+# Code and the configuration live in /app; the database and logs live in
+# /data, which is the bot's working directory and the volume to persist.
 FROM debian:13-slim
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
@@ -15,6 +15,7 @@ COPY bot.pl events.txt events.uk.txt /app/
 COPY lib /app/lib
 COPY lang /app/lang
 COPY docker/entrypoint.sh /app/entrypoint.sh
+COPY docker/irpg.conf /app/irpg.conf
 COPY docker/stunnel.conf /etc/stunnel/irc.conf
 WORKDIR /data
 USER 10001

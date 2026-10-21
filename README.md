@@ -29,8 +29,8 @@ What this fork adds:
   [gremax/uanet-idlerpg-site](https://github.com/gremax/uanet-idlerpg-site): the
   players without passwords, nicks or hosts, the items on the map, the quest and
   the latest events. The bot replaces the file whole (a new file, then a rename)
-  with every database write and at every level up. `npc` names the characters
-  the site marks as NPCs.
+  with every database write and at every level up. `npc` names the NPCs: the
+  site lists them apart, and the bot leaves them out of its top five and topic.
 
 Container
 ---------
@@ -43,39 +43,34 @@ bot has no TLS, so a pod runs the image twice:
   connects to `irc.uanet.net:6697`, checking the certificate. Start it before the bot
   (a native sidecar); the bot retries every `reconnect_wait` seconds anyway.
 
-The bot runs as uid 10001 in `/data`: `.irpg.conf` is read from there, and the
-database (`irpg.db`, `items.db`), `modifiers.txt`, `questinfo.txt`, `public.json`
-and the bot's own backups in `.dbbackup/` are written there. Persist `/data`, and
-run one copy only.
+The bot runs as uid 10001 in `/data`, where it writes the database (`irpg.db`,
+`items.db`), `modifiers.txt`, `public.json` and its own backups in `.dbbackup/`.
+Persist `/data`, and run one copy only.
 
-In `.irpg.conf`, point at the code in `/app` and at stunnel:
-
-```
-server 127.0.0.1:6667
-eventsfile /app/events.uk.txt
-langdir /app/lang
-lang uk
-publicfile public.json
-```
-
-Leave `botident` out; the entrypoint builds it from the environment:
+The configuration for UAnet, `docker/irpg.conf`, is in the image: the entrypoint
+links it to `/data/.irpg.conf` on every start, so changing it is a new image.
+Passwords are not in it; the entrypoint takes them from the environment:
 
 | Variable | Used for |
 | --- | --- |
-| `IRPG_NICKSERV_PASS` | `PRIVMSG NickServ :IDENTIFY <password>` on connect |
+| `IRPG_NICKSERV_PASS` | `IDENTIFY <botnick> <password>` to NickServ on connect, and `GHOST <botnick> <password>` to take the nick back |
 | `IRPG_ADMIN`, `IRPG_ADMIN_PASS`, `IRPG_ADMIN_CLASS` | the admin character, on the first run only (no `irpg.db` yet); the class defaults to `Admin` |
+| `IRPG_CONFIG` | another configuration file instead of `/app/irpg.conf`, for testing |
+
+Admin commands: [docs/admin.md](docs/admin.md).
 
 Licensing
 ---------
 
 The parts differ:
 
-- `bot.pl`, `events.txt`, `irpgdbtool`, `README` and `ChangeLog.txt` are by
-  jotun and the other IdleRPG authors. Their terms are in the header of
+- `bot.pl`, `events.txt`, `example.irpg.conf`, `irpgdbtool`, `README` and
+  `ChangeLog.txt` are by jotun and the other IdleRPG authors. Their terms are in the header of
   `bot.pl`: distributing modified versions needs written permission from the
   authors. This fork does not have it, same as the forks it is based on.
 - `lang/` holds the bot's messages taken out of `bot.pl`, and translations of
-  them; `events.uk.txt` translates `events.txt`. Both fall under the same terms
-  as `bot.pl`.
-- `lib/`, `t/`, `docker/`, `Dockerfile` and `.github/` are new code written for
-  this fork and are under the MIT license, see `LICENSE-MIT`.
+  them; `events.uk.txt` translates `events.txt`; `docker/irpg.conf` is
+  `example.irpg.conf` set up for UAnet. They fall under the same terms as
+  `bot.pl`.
+- `lib/`, `t/`, `docs/`, the rest of `docker/`, `Dockerfile` and `.github/` are
+  new, written for this fork, and are under the MIT license, see `LICENSE-MIT`.
