@@ -12,10 +12,12 @@ my $root = "$FindBin::Bin/..";
 # translation may use either
 my %variants = (item_acc => 'item');
 
-sub placeholders {
+# placeholders a translation may leave out, where its line reads better without
+my %optional = ('topic.entry' => { rank => 1, class => 1 });
+
+sub placeholders { # the names of the placeholders in a text
     my $text = shift;
-    my %names = map { ($variants{$_} // $_) => 1 } ($text =~ /%\{(\w+)[|}]/g);
-    return join(",", sort keys(%names));
+    return { map { ($variants{$_} // $_) => 1 } ($text =~ /%\{(\w+)[|}]/g) };
 }
 
 my $en = IRPG::Lang::parse("$root/lang/en.txt");
@@ -38,8 +40,11 @@ for my $file (glob("$root/lang/*.txt")) {
     my $tr = IRPG::Lang::parse($file);
     for my $key (sort keys(%$tr)) {
         ok(exists($en->{$key}), "$file: $key exists in en.txt") or next;
-        is(placeholders($tr->{$key}), placeholders($en->{$key}),
-           "$file: $key has the placeholders of en.txt");
+        my ($want, $have) = (placeholders($en->{$key}), placeholders($tr->{$key}));
+        my @missing = grep { !$have->{$_} && !$optional{$key}{$_} } sort keys(%$want);
+        my @extra = grep { !$want->{$_} } sort keys(%$have);
+        ok(!@missing && !@extra, "$file: $key has the placeholders of en.txt")
+            or diag("missing: @missing; not in en.txt: @extra");
     }
 }
 

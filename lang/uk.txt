@@ -115,7 +115,11 @@ usage.move Синтаксис: MOVE <гравець> <x> <y>
 move.done %{player} переміщено з %{oldx},%{oldy} на %{x},%{y}.
 usage.pit Синтаксис: PIT <гравець_1> <гравець_2>
 pit.done %{player} проти %{opp}: бій!
-topic.entry #%{rank}: %{player}, рів. %{level} %{class};
+topic IdleRPG на UAnet · лідери: %{top} · %{url}
+topic.none IdleRPG на UAnet · %{url}
+topic.custom %{text} · лідери: %{top}
+topic.entry %{player} (%{level})
+topic.join %{a}, %{b}
 
 # levels and the top list
 levelup %{player}, %{class}, досягає рівня %{level}! Наступний рівень через %{time}.

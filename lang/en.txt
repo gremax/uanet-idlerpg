@@ -112,7 +112,11 @@ usage.move Try: MOVE <Player> <x> <y>
 move.done Moved %{player} from %{oldx},%{oldy} to %{x},%{y}.
 usage.pit Try: PIT <Player 1> <Player 2>
 pit.done Pit %{player} against %{opp}.
+topic %{url} %{top}
+topic.none %{url}
+topic.custom %{text} %{top}
 topic.entry #%{rank}: %{player}, lv. %{level} %{class};
+topic.join %{a} %{b}
 
 # levels and the top list
 levelup %{player}, the %{class}, has attained level %{level}! Next level in %{time}.

@@ -1056,17 +1056,9 @@ sub parse {
                    privmsg(msg('noaccess.loser'), $usernick, 1);
                 } else {
                    privmsg(msg('okay'), $usernick, 1);
-                   my @u = sort { $rps{$b}{level} <=> $rps{$a}{level} ||
-                      $rps{$a}{next}  <=> $rps{$b}{next} } keys(%rps);
-
-                   my $top = "";
-                   for my $i (0..2) {
-                       $#u >= $i and
-                       $top .= msg('topic.entry', rank => $i+1, player => $u[$i],
-                                   level => $rps{$u[$i]}{level},
-                                   class => $rps{$u[$i]}{class})." ";
-                   }
-                   sts("TOPIC $opts{botchan} :@arg[4..$#arg] $top", 1);
+                   # without text, the topic the bot sets itself
+                   sts("TOPIC $opts{botchan} :".
+                       topic($#arg > 3 ? "@arg[4..$#arg]" : undef), 1);
                 }
             }
 
@@ -1361,8 +1353,7 @@ sub rpcheck { # check levels, update database
         # quest type 2 awards are handled in moveplayers()
     }
     if ($rpreport && ($rpreport%36000 < $oldrpreport%36000)) { # 10 hours
-        my @u = sort { $rps{$b}{level} <=> $rps{$a}{level} ||
-                       $rps{$a}{next}  <=> $rps{$b}{next} } keys(%rps);
+        my @u = ranking();
         chanmsg(msg('top.header')) if @u;
         for my $i (0..4) {
             $#u >= $i and
@@ -1372,19 +1363,7 @@ sub rpcheck { # check levels, update database
                         time => duration($rps{$u[$i]}{next})));
         }
 
-        # Set the topic with the helpurl and top players. Repeats the code
-        # because everything in this bot is inside a if :-P
-        my @z = sort { $rps{$b}{level} <=> $rps{$a}{level} ||
-            $rps{$a}{next}  <=> $rps{$b}{next} } keys(%rps);
-
-        my $top = "";
-        for my $i (0..2) {
-            $#z >= $i and
-            $top .= msg('topic.entry', rank => $i+1, player => $z[$i],
-                        level => $rps{$z[$i]}{level},
-                        class => $rps{$z[$i]}{class})." ";
-        }
-        sts("TOPIC $opts{botchan} :$opts{helpurl} $top", 1);
+        sts("TOPIC $opts{botchan} :".topic(), 1);
 
         backup();
     }
@@ -2700,11 +2679,40 @@ sub writedb {
     writepublic();
 }
 
+sub npcs { # the characters the npc option marks as NPCs
+    return split(/[\s,]+/,$opts{npc} // "");
+}
+
+sub ranking { # players by level, then by time to the next; NPCs aren't ranked
+    my %npc = map { $_ => 1 } npcs();
+    return sort { $rps{$b}{level} <=> $rps{$a}{level} ||
+                  $rps{$a}{next}  <=> $rps{$b}{next} }
+           grep { !$npc{$_} } keys(%rps);
+}
+
+sub topic { # the channel topic: the helpurl, or $text, and the top three
+    my $text = shift;
+    my @top = grep { defined } (ranking())[0..2];
+    my $list;
+    for my $i (0..$#top) {
+        my $entry = msg('topic.entry', rank => $i+1, player => $top[$i],
+                        level => $rps{$top[$i]}{level},
+                        class => $rps{$top[$i]}{class});
+        $list = defined($list) ? msg('topic.join', a => $list, b => $entry)
+                               : $entry;
+    }
+    if (defined($text)) {
+        return @top ? msg('topic.custom', text => $text, top => $list) : $text;
+    }
+    return @top ? msg('topic', url => $opts{helpurl}, top => $list)
+                : msg('topic.none', url => $opts{helpurl});
+}
+
 sub writepublic { # the public part of the game, for the site
     return unless $opts{publicfile};
     my $data = IRPG::Public::build(rps => \%rps, mapitems => \%mapitems,
                                    quest => \%quest, modsfile => $opts{modsfile},
-                                   npc => [split(/[\s,]+/,$opts{npc} // "")]);
+                                   npc => [npcs()]);
     eval { IRPG::Public::write_json($data,$opts{publicfile}); 1 } or
         warn(debug("Error: $@")."\n");
 }
