@@ -38,6 +38,7 @@ register.reserved Sorry, that character name cannot be registered.
 register.namelength Sorry, character names must be < 17 and > 0 chars long.
 register.hash Sorry, character names may not begin with #.
 register.ctcp Sorry, character names may not include character \001.
+register.ascii Sorry, neither character names nor classes may include non-printable chars.
 register.ccodes Sorry, neither character names nor classes may include control codes.
 register.nonprint Sorry, neither character names nor classes may include non-printable chars.
 register.classlength Sorry, character classes must be < 31 chars long.

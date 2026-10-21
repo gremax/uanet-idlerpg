@@ -168,7 +168,7 @@ if (! -e $opts{dbfile}) {
     $uname = length($uname)?$uname:$opts{owner};
     print "Enter a character class for this account: ";
     chomp(my $uclass = <STDIN>);
-    $rps{$uname}{class} = substr($uclass,0,30);
+    $rps{$uname}{class} = usubstr($uclass,30);
     print "Enter a password for this account: ";
     if ($^O ne "MSWin32") {
         system("stty -echo");
@@ -487,8 +487,12 @@ sub parse {
                            "@arg[6..$#arg]" =~ /[[:cntrl:]]/)) {
                         privmsg(msg('register.ccodes'),$usernick);
                     }
+                    # names stay ASCII, a class may be any UTF-8 text
+                    elsif ($opts{nononp} && $arg[4] =~ /[^[:ascii:]]/) {
+                        privmsg(msg('register.ascii'),$usernick);
+                    }
                     elsif ($opts{nononp} && ($arg[4] =~ /[[:^print:]]/ ||
-                           "@arg[6..$#arg]" =~ /[[:^print:]]/)) {
+                           nonprint("@arg[6..$#arg]"))) {
                         privmsg(msg('register.nonprint'),$usernick);
                     }
                     elsif (ulength("@arg[6..$#arg]") > 30) {
@@ -1235,10 +1239,27 @@ sub msg { # return message $key from the message table, filled in with %args
     return $lang->msg(@_);
 }
 
+sub uchars { # UTF-8 text as characters, or undef if it is not UTF-8
+    my $text = shift;
+    return eval { Encode::decode('UTF-8', $text, Encode::FB_CROAK) };
+}
+
 sub ulength { # length in characters of UTF-8 text, in bytes if it is not UTF-8
     my $text = shift;
-    my $chars = eval { Encode::decode('UTF-8', $text, Encode::FB_CROAK) };
-    return defined($chars) ? length($chars) : length($text);
+    return length(uchars($text) // $text);
+}
+
+sub usubstr { # the first $n characters of UTF-8 text, or bytes if it is not UTF-8
+    my ($text, $n) = @_;
+    my $chars = uchars($text);
+    return defined($chars) ? Encode::encode('UTF-8', substr($chars, 0, $n))
+                           : substr($text, 0, $n);
+}
+
+sub nonprint { # whether text has characters that don't print; any byte of text
+               # that is not UTF-8 counts as one
+    my $text = shift;
+    return (uchars($text) // $text) =~ /[[:^print:]]/;
 }
 
 sub andlist { # "a, b and c"
