@@ -32,6 +32,7 @@ use lib "$FindBin::Bin/lib";
 use IRPG::Lang;
 use IRPG::Public;
 use IRPG::Password;
+use IRPG::Mode;
 
 # To use this script in OpenBSD you need to install the Crypt::UnixCrypt
 # perl module because OpenBSD crypt() isn't compatible with the Linux crypt().
@@ -389,6 +390,13 @@ sub parse {
     elsif ($arg[1] eq 'notice' && $arg[2] ne $opts{botnick}) {
         penalize($username,"notice",length("@arg[3..$#arg]")-1);
     }
+    elsif ($arg[1] eq 'mode' && lc($arg[2]) eq lc($opts{botchan})) {
+        # opped, by ChanServ after botopcmd or by anyone: set the topic now
+        # rather than at the next top-players report, ten hours on
+        if (IRPG::Mode::opped($opts{botnick}, @arg[3..$#arg])) {
+            sts("TOPIC $opts{botchan} :".topic(), 1);
+        }
+    }
     elsif ($arg[1] eq '001') {
         # send our identify command, set our usermode, join channel
         sts($opts{botident});
@@ -412,16 +420,10 @@ sub parse {
                             hosts => scalar(keys(%prev_online))));
             }
             if ($opts{voiceonlogin}) {
-                my @vnicks = map { $rps{$_}{nick} } keys(%auto_login);
-                while (scalar @vnicks >= $opts{modesperline}) {
-                    sts("MODE $opts{botchan} +".
-                        ('v' x $opts{modesperline})." ".
-                        join(" ",@vnicks[0..$opts{modesperline}-1]));
-                    splice(@vnicks,0,$opts{modesperline});
-                }
-                sts("MODE $opts{botchan} +".
-                    ('v' x (scalar @vnicks))." ".
-                    join(" ",@vnicks));
+                sts($_) for IRPG::Mode::voice($opts{botchan},
+                                              $opts{modesperline},
+                                              map { $rps{$_}{nick} }
+                                                  keys(%auto_login));
             }
         }
         else { chanmsg(msg('autologin.none')); }
