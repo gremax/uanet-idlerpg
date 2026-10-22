@@ -47,13 +47,15 @@ use IRPG::Mode;
 #use Crypt::UnixCrypt;
 
 my %opts;
+my %fromconf; # the options .irpg.conf set when it was last read
+my %cli; # the options given on the command line
 
 readconfig();
 
 my $version = "3.3";
 
 # command line overrides .irpg.conf
-GetOptions(\%opts,
+GetOptions(\%cli,
     "help|h",
     "verbose|v",
     "ipv6",
@@ -114,6 +116,7 @@ GetOptions(\%opts,
     "publicfile=s",
     "npc=s",
 ) or debug("Error: Could not parse command line. Try $0 --help\n",1);
+clioverride();
 
 $opts{help} and do { help(); exit 0; };
 
@@ -647,7 +650,6 @@ sub parse {
                         privmsg("Error: Cannot load message table, kept the ".
                                 "old one. See the debug log.",$usernick,1);
                     }
-                    $opts{botchan} =~ s/ .*//; # strip channel key if present
                 }
             }
             elsif ($arg[3] eq "chpass") {
@@ -1238,7 +1240,11 @@ sub quitbot { # SIGTERM, SIGINT: save the database, quit IRC and exit
 }
 
 sub rehash { # reread config file and message table
+    my ($nick, $chan) = @opts{qw(botnick botchan)};
     readconfig();
+    clioverride();
+    # the bot is on IRC under these, new ones would take a reconnect
+    @opts{qw(botnick botchan)} = ($nick, $chan);
     return loadlang();
 }
 
@@ -2440,7 +2446,8 @@ sub finduser {
 
 sub ha { # return 0/1 if username has access
     my $user = shift;
-    if (!defined($user) || !exists($rps{$user})) {
+    return 0 unless defined($user); # not logged in
+    if (!exists($rps{$user})) {
         debug("Error: Attempted ha() for invalid username \"$user\"");
         return 0;
     }
@@ -2755,7 +2762,7 @@ sub readconfig {
         open(CONF,"<.irpg.conf") or do {
             debug("Failed to open config file .irpg.conf: $!",1);
         };
-        my($line,$key,$val);
+        my($line,$key,$val,%read);
         while ($line=<CONF>) {
             next() if $line =~ /^#/; # skip comments
             $line =~ s/[\r\n]//g;
@@ -2770,9 +2777,21 @@ sub readconfig {
                     "options. Also, read the README file if you haven't ".
                     "yet.\n");
             }
-            elsif ($key eq "server") { push(@{$opts{servers}},$val); }
-            elsif ($key eq "okurl") { push(@{$opts{okurl}},$val); }
-            else { $opts{$key} = $val; }
+            elsif ($key eq "server") { push(@{$read{servers}},$val); }
+            elsif ($key eq "okurl") { push(@{$read{okurl}},$val); }
+            else { $read{$key} = $val; }
         }
+        close(CONF);
+        # on a reread, an option taken out of the file is unset again
+        delete($opts{$_}) for grep { !exists($read{$_}) } keys(%fromconf);
+        @opts{keys(%read)} = values(%read);
+        %fromconf = %read;
+    }
+}
+
+sub clioverride { # put the command line options back over .irpg.conf's
+    for my $key (keys(%cli)) {
+        if ($key eq "okurl") { push(@{$opts{okurl}},@{$cli{okurl}}); }
+        else { $opts{$key} = $cli{$key}; }
     }
 }
