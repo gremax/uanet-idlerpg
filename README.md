@@ -19,7 +19,12 @@ What this fork adds:
   `%{n|form|form...}` plural forms. `lang` and `langdir` in `.irpg.conf` pick
   the language; keys missing from a translation fall back to `lang/en.txt`.
   The English output is the same as the original bot's.
-- Tests: `prove t/` (Test::More, part of core Perl), and `perlcritic lib t`
+- Passwords hashed with argon2id (`Crypt::Argon2`, `libcrypt-argon2-perl` in
+  Debian) instead of DES `crypt()`, which reads only the first eight characters.
+  Old hashes still work and are rehashed at the player's next `LOGIN`. The debug
+  log masks passwords, the players' and the bot's own NickServ one.
+- Tests: `prove t/` (Test::More, part of core Perl; `t/password.t` needs
+  `Crypt::Argon2`), and `perlcritic lib t`
   with `.perlcriticrc` for the code the fork adds; `bot.pl` stays as upstream
   wrote it.
 - `events.uk.txt`, the events in Ukrainian.

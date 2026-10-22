@@ -31,6 +31,7 @@ use FindBin;
 use lib "$FindBin::Bin/lib";
 use IRPG::Lang;
 use IRPG::Public;
+use IRPG::Password;
 
 # To use this script in OpenBSD you need to install the Crypt::UnixCrypt
 # perl module because OpenBSD crypt() isn't compatible with the Linux crypt().
@@ -177,7 +178,7 @@ if (! -e $opts{dbfile}) {
     if ($^O ne "MSWin32") {
         system("stty echo");
     }
-    $rps{$uname}{pass} = crypt($upass,mksalt());
+    $rps{$uname}{pass} = IRPG::Password::hash($upass);
     $rps{$uname}{next} = $opts{rpbase};
     $rps{$uname}{nick} = "";
     $rps{$uname}{userhost} = "";
@@ -515,7 +516,7 @@ sub parse {
                         $rps{$arg[4]}{userhost} = $arg[0];
                         $rps{$arg[4]}{created} = time();
                         $rps{$arg[4]}{lastlogin} = time();
-                        $rps{$arg[4]}{pass} = crypt($arg[5],mksalt());
+                        $rps{$arg[4]}{pass} = IRPG::Password::hash($arg[5]);
                         $rps{$arg[4]}{x} = int(rand($opts{mapx}));
                         $rps{$arg[4]}{y} = int(rand($opts{mapy}));
                         $rps{$arg[4]}{alignment}="n";
@@ -659,7 +660,7 @@ sub parse {
                             $usernick, 1);
                 }
                 else {
-                    $rps{$arg[4]}{pass} = crypt($arg[5],mksalt());
+                    $rps{$arg[4]}{pass} = IRPG::Password::hash($arg[5]);
                     privmsg(msg('chpass.done', player => $arg[4]),
                             $usernick, 1);
                 }
@@ -802,7 +803,7 @@ sub parse {
                     privmsg(msg('usage.newpass'), $usernick);
                 }
                 else {
-                    $rps{$username}{pass} = crypt($arg[4],mksalt());
+                    $rps{$username}{pass} = IRPG::Password::hash($arg[4]);
                     privmsg(msg('newpass.done'),$usernick);
                 }
             }
@@ -988,11 +989,15 @@ sub parse {
                         notice(msg('notonchan', channel => $opts{botchan}),
                                 $usernick);
                     }
-                    elsif ($rps{$arg[4]}{pass} ne
-                           crypt($arg[5],$rps{$arg[4]}{pass})) {
+                    elsif (!IRPG::Password::check($arg[5],
+                                                  $rps{$arg[4]}{pass})) {
                         notice(msg('login.wrongpass'), $usernick);
                     }
                     else {
+                        # an old DES hash: now that we have the password
+                        if (IRPG::Password::legacy($rps{$arg[4]}{pass})) {
+                            $rps{$arg[4]}{pass} = IRPG::Password::hash($arg[5]);
+                        }
                         if ($opts{voiceonlogin}) {
                             sts("MODE $opts{botchan} +v :$usernick");
                         }
@@ -2029,10 +2034,6 @@ sub moveplayers {
     }
 }
 
-sub mksalt { # generate a random salt for passwds
-    join '',('a'..'z','A'..'Z','0'..'9','/','.')[rand(64), rand(64)];
-}
-
 sub chanmsg { # send a message to the channel
     my $msg = shift or return undef;
     if ($silentmode & 1) { return undef; }
@@ -2411,6 +2412,7 @@ sub penalize {
 
 sub debug {
     (my $text = shift) =~ s/[\r\n]//g;
+    $text = IRPG::Password::redact($text);
     my $die = shift;
     if ($opts{debug} || $opts{verbose}) {
         open(DBG,">>$opts{debugfile}") or do {

@@ -7,7 +7,7 @@
 FROM debian:13-slim
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-        perl libio-socket-inet6-perl stunnel4 ca-certificates \
+        perl libio-socket-inet6-perl libcrypt-argon2-perl stunnel4 ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 RUN useradd --system --uid 10001 --home-dir /data --no-create-home idlerpg \
  && mkdir /data && chown idlerpg /data

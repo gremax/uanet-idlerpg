@@ -19,10 +19,10 @@ jobs:
     steps:
       - name: Check out the repository
         uses: actions/checkout@v7
-      - name: Install the bot's Perl dependency and Perl::Critic
+      - name: Install the bot's Perl dependencies and Perl::Critic
         run: >-
           sudo apt-get update && sudo apt-get install -y --no-install-recommends
-          libio-socket-inet6-perl libperl-critic-perl
+          libio-socket-inet6-perl libcrypt-argon2-perl libperl-critic-perl
       - name: Check bot.pl compiles
         run: perl -c bot.pl
       # only the fork's own code, as set in .perlcriticrc
