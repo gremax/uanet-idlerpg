@@ -67,7 +67,8 @@ my $mods = modsfile("[10/21/26 01:30:00] перша подія\n",
 
 my $game = IRPG::Public::build(rps => \%rps, mapitems => \%mapitems,
                                quest => \%quest2, npc => ['Don'],
-                               modsfile => "$mods", now => 1792546000);
+                               modsfile => "$mods", now => 1792546000,
+                               heard => 1792545990);
 
 is_deeply($game->{players}[2], {
     name => 'Paganel', class => u('Гном-інженер'), level => 21, next => 523,
@@ -119,6 +120,8 @@ is_deeply($game->{events}, [
 is_deeply(IRPG::Public::build(rps => {}, modsfile => "$mods", events => 2)->{events},
           [ @{$game->{events}}[0, 1] ], 'as many as asked for');
 is($game->{updated}, '2026-10-21T01:26:40Z', 'the time of the export');
+is($game->{heard}, '2026-10-21T01:26:30Z', 'when the bot last heard the server');
+is(IRPG::Public::build(rps => {})->{heard}, undef, 'null while disconnected');
 
 my $long = modsfile(map { sprintf("[10/21/26 01:%02d:%02d] подія номер %d\n",
                                   $_ / 60, $_ % 60, $_) } (0..3599));

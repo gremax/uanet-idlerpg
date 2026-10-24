@@ -154,6 +154,7 @@ my $registrations = 0; # count of registrations this period
 my $sel; # IO::Select object
 my $lasttime = 1; # last time that rpcheck() was run
 my $buffer; # buffer for socket stuff
+my $heard; # last time a line came from the server, undef while disconnected
 my $conn_tries = 0; # number of connection tries. gives up after trying each
                     # server twice
 my $sock; # IO::Socket::INET object
@@ -262,6 +263,7 @@ while (1) {
         my $buffer2;
         $fh->recv($buffer2,512,0);
         if (length($buffer2)) {
+            $heard = time();
             $buffer .= $buffer2;
             while (index($buffer,"\n") != -1) {
                 my $line = substr($buffer,0,index($buffer,"\n")+1);
@@ -275,6 +277,7 @@ while (1) {
             # users' online flags to 1, rewrite db, and attempt to reconnect
             # (if that's wanted of us)
             $rps{$_}{online}=1 for keys(%auto_login);
+            undef($heard);
             writedb();
 
             close($fh);
@@ -2748,7 +2751,7 @@ sub writepublic { # the public part of the game, for the site
     return unless $opts{publicfile};
     my $data = IRPG::Public::build(rps => \%rps, mapitems => \%mapitems,
                                    quest => \%quest, modsfile => $opts{modsfile},
-                                   npc => [npcs()]);
+                                   npc => [npcs()], heard => $heard);
     eval { IRPG::Public::write_json($data,$opts{publicfile}); 1 } or
         warn(debug("Error: $@")."\n");
 }

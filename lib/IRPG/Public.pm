@@ -19,7 +19,9 @@ my %slot = (amulet => "amulet", charm => "charm", helm => "helm",
             shield => "shield", tunic => "tunic", weapon => "weapon");
 
 # build(rps => \%rps, mapitems => \%mapitems, quest => \%quest, npc => [names],
-#       modsfile => FILE, events => COUNT, now => EPOCH)
+#       modsfile => FILE, events => COUNT, now => EPOCH, heard => EPOCH)
+# heard is when the bot last got a line from the server, undef while it is not
+# connected: the site's /status reports a bot that hears nothing
 sub build {
     my %opt = @_;
     my %npc = map { $_ => 1 } @{$opt{npc} || []};
@@ -33,6 +35,7 @@ sub build {
         quest => quest($opt{quest}),
         events => [ events($opt{modsfile}, $opt{events} // 20) ],
         updated => iso($opt{now} // time()),
+        heard => defined($opt{heard}) ? iso($opt{heard}) : undef,
     };
 }
 
